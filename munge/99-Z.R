@@ -1,10 +1,6 @@
 # VERSION HISTORY
 z99.version = "1.0.0"
 z99.ModDate = as.Date("2019-01-01")
-
-# save RData image
-save.image("readability.RData")
-
 ################################################################################
 ## Step 99.00 create object table                                            ###
 ################################################################################
@@ -19,27 +15,22 @@ lsObj<-list(dtObj[Type == 'data.table' & Length_Rows == 0][,1])
 df  <-  ls()[sapply(ls(), function(x) is.data.frame(get(x)) | is.xts(get(x)))]
 l   <-  ls()[sapply(ls(), function(x) is.data.frame(get(x)))]
 sapply(l, function(x) names(l))
-
 rm(list = ls()[grepl("(SQL|X2016Tuition)", ls())])                             # remove (rm) dataframes with 'SQL' in its name
-###############################################################################
-## Step 99.01: Processing                                                    ###
 ################################################################################
-# rmarkdown::render(input="./reports/dashboard.Rmd")
-# rmarkdown::render(input="./dashboard/Flexdashboard.Rmd")
-
-################################################################################
+## Step 99.01: RMARKDOWN PROCESSING                                          ###
 ## Call rmarkdown::run() instead of render() because it is a shiny document  ### https://tinyurl.com/y2y2azny
 ## (http://rmarkdown.rstudio.com/authoring_shiny.html).                      ###
 ################################################################################
+# rmarkdown::render(input="./reports/dashboard.Rmd")
+# rmarkdown::render(input="./dashboard/Flexdashboard.Rmd")
 # rmarkdown::run("./reports/Flexdashboard.Rmd")
 # rmarkdown::run("./reports/_Flexdashboard.Rmd")
-
-# The Real Deal
-rmarkdown::run("./dashboard/Flexdashboard.Rmd")
-
 # xaringan::infinite_moon_reader("./reports/dashboard.Rmd")0
-
-## DIAGNOSTIC PAGE
+# The Real Deal
+# rmarkdown::run("./dashboard/Flexdashboard.Rmd")
+################################################################################
+## Step 99.97:  DIAGNOSTIC PAGE                                              ###
+################################################################################
 s.info = sessionInfo()
 diagnostic = data.frame("Version","Date")
 diagnostic[,1]=as.character(diagnostic[,1])
@@ -55,7 +46,6 @@ ver = s.info[["platform"]][1]
 dat = ""
 diagnostic = rbind(diagnostic,c(ver,dat))
 diagnostic.names = c(diagnostic.names,"R Version","platform")
-
 
 if (length(s.info[["otherPkgs"]])> 0){
   for(i in 1:length(s.info[["otherPkgs"]])){
@@ -100,14 +90,14 @@ while (last.diagnostic <= nrow(diagnostic)){
   
   last.diagnostic = last.diagnostic + diagnostic.rows + 1
 }
-
-finish.time = Sys.time()
-time = finish.time = start.time
-
-
+################################################################################
+## Step 99.98:  PROCESSING TIME                                              ###
+################################################################################
+finish.time <- Sys.time()
+time <- finish.time - start.time
+print(finish.time - start.time)
 ################################################################################
 ## Step 99.99: VERSION HISTORY                                               ###
 ################################################################################
-
 # 2019.01.01 - v.1.0.0                                                          http://tinyurl.com/y54k8gsw
 #  1st release                                                                  http://tinyurl.com/yx9w8vje
