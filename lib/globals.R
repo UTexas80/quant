@@ -15,6 +15,7 @@ options(getSymbols.warning4.0 = FALSE)                 # Suppresses warnings ###
 rm(list = ls(.blotter), envir = .blotter)              # Do some house cleaning#
 Sys.setenv(TZ = "UTC")                                 # Set the timezone    ###
 currency("USD")                                        # Set the currency    ###
+currency("AUD")                                        # Set the currency    ###
 ################################################################################
 ## Date Parameters                                                           ###
 ################################################################################

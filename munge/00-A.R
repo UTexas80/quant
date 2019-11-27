@@ -15,6 +15,10 @@ getSymbols(Symbols = symbols,
            from = start_date,
            to = end_date,
            adjust = adjustment)
+# ------------Replace missing values (NA)       https://tinyurl.com/y5etxh8x ###
+SPL.AX <-
+  SPL.AX %>%
+  na.omit()
 ## -- use FinancialInstrument::stock() to define the meta-data for the symbols.-
 stock(symbols,
       currency = "USD",
@@ -56,9 +60,9 @@ add.indicator(strategy = strategy.st,             # 30 day SMA               ###
               name = "SMA",
               arguments = list(x = quote(Cl(mktdata)),
                                n = 30),
-              label = "nSlow")
+              label = "nSlow")                    # label = mktdata column name#
 ################################################################################
-## Step 00.04: Pass Signals to the Strategy                                   ###
+## Step 00.04: Pass Signals to the Strategy                                  ###
 ################################################################################
 add.signal(strategy = strategy.st,                # Long Signal              ###
            name="sigCrossover",
@@ -138,19 +142,19 @@ add.rule(strategy.st,                            # Close Short Position      ###
 ## Step 00.06: Apply Strategy                                                ###
 ################################################################################
 cwd          <- getwd()
-setwd("./_data/")
+setwd("./reports/")
 results_file <- paste("results", strategy.st, "RData", sep = ".")
 if( file.exists(results_file) ) {
-    load(results_file)
+  load(results_file)
 } else {
-    results  <- applyStrategy(strategy.st, portfolios = portfolio.st)
-    updatePortf(portfolio.st)
-    updateAcct(account.st)
-    updateEndEq(account.st)
-    if(checkBlotterUpdate(portfolio.st, account.st, verbose = TRUE)) {
-        save(list = "results", file = results_file)
-        save.strategy(strategy.st)
-    }
+  results  <- applyStrategy(strategy.st, portfolios = portfolio.st)
+  updatePortf(portfolio.st)
+  updateAcct(account.st)
+  updateEndEq(account.st)
+  if(checkBlotterUpdate(portfolio.st, account.st, verbose = TRUE)) {
+    save(list = "results", file = results_file)
+    save.strategy(strategy.st)
+  }
 }
 setwd(cwd)
 ################################################################################

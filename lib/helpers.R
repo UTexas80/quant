@@ -13,6 +13,11 @@ basic_symbols <- function() {
         "SPY" # SPDR S&P 500 ETF Trust
     )
 }
+basic_symbols <- function() {
+    symbols <- c(
+        "SPL.AX" # Starpharma
+    )
+}
 enhanced_symbols <- function() {
     symbols <- c(
         basic_symbols(), 
