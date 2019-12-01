@@ -6,12 +6,11 @@ data_loading: TRUE
 data_loading_header: TRUE
 data_ignore:
 load_libraries: TRUE
-libraries:  data.table, devtools, dplyr, DT, flexdashboard, flextable, ggplot2, 
-            gt, here, highcharter, htmltools, htmlwidgets, janitor, knitr, lattice, 
-            lintr, lubridate, magrittr, openxlsx, pander, PerformanceAnalytics, pivottabler, 
-            plyr, ProjectTemplate, quantmod, quantstrat, readr, readxl, reprex, 
-            reshape2,rmarkdown, shiny, shinydashboard, shinyWidgets, SIT, stringr, 
-            styler, tidyverse, timetk, treemap, tryCatchLog, utils, webshot, xlsx, xtable, zoo
+libraries: data.table, devtools, dplyr, DT, flexdashboard, flextable, ggplot2, gt, here, highcharter,
+            htmltools, htmlwidgets, janitor, knitr, lattice, lintr, lubridate, magrittr, openxlsx, pander,
+            PerformanceAnalytics, pivottabler, plyr, ProjectTemplate, quantmod, quantstrat, readr, readxl,
+            reprex, reshape2,rmarkdown, shiny, shinydashboard, shinyWidgets, SIT, stringr, styler,
+            tidyverse, timetk, treemap, tryCatchLog, utils, webshot, xlsx, xtable, zoo
 logging: TRUE
 logging_level: INFO
 munging: TRUE

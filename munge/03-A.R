@@ -17,7 +17,7 @@ maType="EMA"
 currency('USD')
 stock(stock.str,currency='USD',multiplier=1)
 
-startDate='2006-12-31'
+startDate='2016-12-31'
 initEq=1000000
 portfolio.st='macd'
 account.st='macd'
@@ -43,35 +43,62 @@ add.indicator(strat.st, name = "MACD",
 
 add.indicator(strat.st, name = "SMA",
               arguments = list(x=quote(Cl(mktdata)),
-                               n=10),
-              label='SMA10'
+                               n=20),
+              label='SMA020'
 )
-
 
 
 add.indicator(strat.st, name = "SMA",
               arguments = list(x=quote(Cl(mktdata)),
                                n = 50),
-              label='SMA50'
+              label='SMA050'
 )
 
+add.indicator(strat.st, name = "SMA",
+              arguments = list(x=quote(Cl(mktdata)),
+                               n = 100),
+              label='SMA100'
+)
+
+
+add.indicator(strat.st, name = "SMA",
+              arguments = list(x=quote(Cl(mktdata)),
+                               n = 200),
+              label='SMA200'
+)
+
+
 # Create your own signal for entry:
-macdSMAsig <- function(data) {
+goldenX_SMA_Buy <- function(data) {
   # first condition:
-  sig <- data[, "SMA.SMA50"] > data[, "SMA.SMA10"] & data[, "macd._"] > 0
+  sig <- data[, "SMA.SMA020"] > data[, "SMA.SMA050"] & data[, "SMA.SMA050"] > data[, "SMA.SMA100"] & data[, "SMA.SMA100"] > data[, "SMA.SMA200"]
   colnames(sig) <- "upSig"
   sig
 }
 
 
+# Create your own signal for entry:
+macdSMAsig <- function(data) {
+  # first condition:
+  sig <- data[, "SMA.SMA020"] > data[, "SMA.SMA050"] & data[, "macd._"] > 0
+  colnames(sig) <- "upSig"
+  sig
+}
 
  # Activate (uncomment) only ONE of the following signals.  Both do the same thing:
 
 #OPTION 1 for entry signal based on combining signals:
-add.signal(strat.st,name="macdSMAsig",
+add.signal(strat.st,name="goldenX_SMA_Buy",
            arguments = list(data = quote(mktdata)),
            label="enterSig"
 )
+
+
+# #OPTION 1b for entry signal based on combining signals:
+# add.signal(strat.st,name="macdSMAsig",
+#            arguments = list(data = quote(mktdata)),
+#            label="enterSig"
+# )
 
 #OPTION 2 for entry signal based on combining signals:
 # add.signal(strat.st, name = "sigFormula",
@@ -90,6 +117,12 @@ add.signal(strat.st,name="sigThreshold",
            label="signal.lt.zero"
 )
 
+goldenX_SMA_Sell <- function(data) {
+  # first condition:
+  sig <- data[, "SMA.SMA020"] < data[, "SMA.SMA050"] | data[, "SMA.SMA050"] < data[, "SMA.SMA100"] | data[, "SMA.SMA100"] < data[, "SMA.SMA200"]
+  colnames(sig) <- "upSig"
+  sig
+}
 ####
 # add rules
 

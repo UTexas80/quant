@@ -20,7 +20,7 @@ currency("AUD")                                        # Set the currency    ###
 ## Date Parameters                                                           ###
 ################################################################################
 init_date <- "2002-01-01"
-start_date <- "2003-01-01"
+start_date <- "2014-01-01"
 end_date <- "2019-11-25"
 
 initDate = "2002-01-01"

@@ -48,19 +48,27 @@ initOrders(portfolio = portfolio.st,              # Order Initialization     ###
 # ------------------------------------------------------------------------------
 strategy(strategy.st, store = TRUE)               # Strategy Initialization  ###
 ################################################################################
-## Step 00.03a: Ass Indicators to the Golden Cross Strategy                  ###
+## Step 00.03a: Add Indicators to the Golden Cross Strategy                  ###
 ################################################################################
 # Delete portfolio, account, and order book if they already exist
 suppressWarnings(rm("account.GoldenX","portfolio.GoldenX",pos=.blotter))
 suppressWarnings(rm("order_book.GoldenX",pos=.strategy))
-# Initialize portfolio and account
-initPortf(name = "GoldenX",                    # Portfolio Initialization ###
+# ------------------------------------------------------------------------------
+## portfolio, account and orders initialization. ----------------------------###
+initPortf(name = "GoldenX",                    # Portfolio Initialization    ###
           symbols = symbols,
           initDate = init_date)
-initAcct("GoldenX", portfolios="GoldenX", initDate=init_date, initEq=init_equity)
-initOrders(portfolio="GoldenX", initDate=init_date)
-# Initialize a strategy object
-stratGoldenX <- strategy("GoldenX")
+# ------------------------------------------------------------------------------
+initAcct(name = "GoldenX",                     # Account Initialization      ###
+         portfolios="GoldenX",
+         initDate=init_date,
+         initEq=init_equity)
+# ------------------------------------------------------------------------------
+initOrders(portfolio="GoldenX",                # Order Initialization        ###
+           symbols = symbols,
+           initDate=init_date)
+# ------------------------------------------------------------------------------
+stratGoldenX <- strategy("GoldenX")            # Strategy Initialization     ###
 ################################################################################
 ## Step 00.03: Add Indicators to the Strategy                                ###
 ################################################################################
@@ -78,22 +86,24 @@ add.indicator(strategy = strategy.st,             # 30 day SMA               ###
 
 ####INDICATORS####---------------------------------------https://is.gd/SBHCcH---
 
+# Add the 20-day SMA indicator
+stratGoldenX <- add.indicator(strategy=stratGoldenX, name="EMA", arguments =
+list(x=quote(mktdata[,4]), n=20), label="020")
+
+# Add the 50-day SMA indicator
+stratGoldenX <- add.indicator(strategy=stratGoldenX, name="EMA", arguments =
+list(x=quote(mktdata[,4]), n=50), label="050")
+
+# Add the 100-day SMA indicator
+stratGoldenX <- add.indicator(strategy=stratGoldenX, name="EMA", arguments =
+list(x=quote(mktdata[,4]), n=100), label="100")
+
 # Add the 200-day SMA indicator
 stratGoldenX <- add.indicator(strategy=stratGoldenX, name="EMA", arguments =
-list(x=quote(mktdata[,4]), n=20), label="EMA020")
-
-stratGoldenX <- add.indicator(strategy=stratGoldenX, name="EMA", arguments =
-list(x=quote(mktdata[,4]), n=50), label="EMA050")
-
-stratGoldenX <- add.indicator(strategy=stratGoldenX, name="EMA", arguments =
-list(x=quote(mktdata[,4]), n=100), label="EMA100")
-
-stratGoldenX <- add.indicator(strategy=stratGoldenX, name="EMA", arguments =
-list(x=quote(mktdata[,4]), n=200), label="EMA200")
+list(x=quote(mktdata[,4]), n=200), label="200")
 
 # Add the GoldenX indicator
-
-#stratGoldenX <- add.indicator(strategy=stratGoldenX, name="RSI", arguments =
+# stratGoldenX <- add.indicator(strategy=stratGoldenX, name="RSI", arguments =
 # list(price = quote(getPrice(mktdata)), n=4), label="RSI")
 ################################################################################
 ## Step 00.04: Pass Signals to the Strategy                                  ###
@@ -113,20 +123,35 @@ add.signal(strategy = strategy.st,                # Short Signal             ###
 
 # The first is when a Golden Cross occurs, i.e.,
 # EMA020 > EMA050 & EMA050 > EMA100 & EMA100 > EMA200
- stratGoldenX <- add.signal(stratGoldenX,
+stratGoldenX <- add.signal(stratGoldenX,
                 name="sigFormula",
-                arguments = list(columns=c("EMA020","EMA050","EMA100", "EMA200"),
-                  formula = "(EMA020 > EMA050 & EMA050 > EMA100 & EMA100 > EMA200)",
+                arguments = list
+                  (columns=c("EMA.020","EMA.050","EMA.100", "EMA.200"),
+                  formula = "(EMA.020 > EMA.050 & EMA.050 > EMA.100 & EMA.100 > EMA.200)",
                   label="trigger",
                   cross=TRUE),
-                label="goldenX")
+                label="goldenX_EMA_open")
 
-# The second is when the GoldenX closes above 55
+# The second is when a Golden Cross criteria is no longer met
 stratGoldenX <- add.signal(stratGoldenX,
-name="sigThreshold",arguments=list(threshold=55, column="RSI",
-relationship="lt", cross=TRUE), label="Cl.lt.RSI")
+                name="sigFormula",
+                arguments = list
+                (columns=c("EMA.020","EMA.050","EMA.100", "EMA.200"),
+                formula = "(EMA.020 <= EMA.050 | EMA.050 <= EMA.100 | EMA.100 <= EMA.200)",
+                label="trigger",
+                cross=TRUE),
+                label="goldenX_EMA_close")
+
+# stratRSI4 <- add.signal(stratGoldenX,
+#                 name="sigThreshold",
+#                 arguments=list(
+#                   threshold=55,
+#                   column="RSI",
+#                   relationship="lt",
+#                   cross=TRUE),
+#                 label="Cl.lt.RSI")
 ################################################################################
-## Step 00.05: Ass Rules to the Strategy                                     ###
+## Step 00.05: Add Rules to the Strategy                                     ###
 ## Whenever our long variable (sigcol) is TRUE (sigval) we want to place a   ###
 ## stoplimit order (ordertype). Our preference is at the High (prefer) plus  ###
 ## threshold. We want to buy 100 shares (orderqty). A new variable EnterLONG ###
@@ -163,13 +188,20 @@ add.rule(strategy.st,                           # Open Short Position        ###
          type = "enter",
          label = "EnterSHORT")
 ####RULES####--------------------------------------------https://is.gd/SBHCcH---
-
-# The first is to buy when the price is above the SMA and GoldenX below 25
+# The first is to buy when the Golden Crossing criteria is met
 # (the first signal)
-stratGoldenX <- add.rule(stratGoldenX, name="ruleSignal",
-arguments=list(sigcol="goldenX", sigval=TRUE, orderqty=1000,
-ordertype="market", orderside="long", pricemethod="market", TxnFees=-5,
-osFUN=osMaxPos), type="enter", path.dep=TRUE)
+stratGoldenX <- add.rule(stratGoldenX,           # Open Long Position        ###
+                name="ruleSignal",
+                arguments=list(sigcol="goldenX_EMA_open",
+                               sigval=TRUE,
+                               orderqty=1000,
+                               ordertype="market",
+                               orderside="long",
+                               pricemethod="market",
+                               TxnFees=-5,
+                               osFUN=osMaxPos),
+                               type="enter",
+                               path.dep=TRUE)
 # ------------------------------------------------------------------------------
 ## rules set up to exit positions based on our signals.                      ###
 # ------------------------------------------------------------------------------
@@ -197,14 +229,26 @@ add.rule(strategy.st,                            # Close Short Position      ###
          type = "exit",
          label = "Exit2LONG")
 ####RULES####--------------------------------------------https://is.gd/SBHCcH---
-
 # The second is to sell when the RSI climbs above 55
-stratGoldenX <- add.rule(stratGoldenX, name="ruleSignal",
-arguments=list(sigcol="Cl.lt.RSI", sigval=TRUE, orderqty="all",
-ordertype="market", orderside="long", pricemethod="market", TxnFees=-5),
-type="exit", path.dep=TRUE)
+stratGoldenX <- add.rule(stratGoldenX,
+                name="ruleSignal",
+                arguments=list(sigcol="goldenX_EMA_close",
+                               sigval=TRUE,
+                               orderqty="all",
+                               ordertype="market",
+                               orderside="long",
+                               pricemethod="market",
+                               TxnFees=-5),
+                               type="exit",
+                               path.dep=TRUE)
+
+
 ################################################################################
-## Step 00.06: Apply Strategy                                                ###
+## Step 00.06: Set Position Limits                                           ###
+################################################################################
+addPosLimit("GoldenX", "SPL.AX", timestamp=initDate, maxpos=1000, minpos=0)
+################################################################################
+## Step 00.07: Apply Strategy                                                ###
 ################################################################################
 cwd          <- getwd()
 setwd("./reports/")
@@ -221,6 +265,21 @@ if( file.exists(results_file) ) {
     save.strategy(strategy.st)
   }
 }
+
+goldenX_file <- paste("results", "GoldenX", "RData", sep = ".")
+if( file.exists(goldenX_file) ) {
+  load(goldenX_file)
+} else {
+  results  <- applyStrategy(stratGoldenX, portfolios = "GoldenX")
+  updatePortf("GoldenX")
+  updateAcct("GoldenX")
+  updateEndEq("GoldenX")
+  if(checkBlotterUpdate("GoldenX", "GoldenX", verbose = TRUE)) {
+    save(list = "results", file = goldenX_file)
+    save.strategy(stratGoldenX)
+  }
+}
+
 setwd(cwd)
 ################################################################################
 ## Step 00.99: VERSION HISTORY                                               ###
